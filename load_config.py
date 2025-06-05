@@ -1,4 +1,11 @@
 def load_config(file) -> dict:
+    return {
+        'topics: ['']'
+        'rss: ['']'
+        'llm_model: [llm]'
+    }
+
+    
     """
     returns a dictionary with the following values
 
@@ -6,4 +13,3 @@ def load_config(file) -> dict:
     rss : list of rss links that we are querying
     llm_model : llm model that we are using
     """
-    pass
