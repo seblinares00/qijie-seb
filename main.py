@@ -1,8 +1,10 @@
-from langchain_ollama import ChatOllama
-from langchain_core.messages import HumanMessage
 import feedparser
+
+from langchain_ollama import ChatOllama
+from langchain_core.messages import HumanMessage, SystemMessage
+from datetime import datetime, timezone
+
 from load_config import load_config
-import json
 
 config = load_config("config.ini")
 
@@ -11,13 +13,27 @@ llm = ChatOllama(
     temperature=0.9,
 )
 
-feed = feedparser.parse(r"https://www.ukri.org/opportunity/feed/")
+# setting the retrieved time to the 1/1/1900 if it doesn't exist
+if config["rss_last_retrieved"] == "":
+    config["rss_last_retrieved"] = datetime(1900,1,1,0,0, tzinfo=timezone.utc)
 
-with open("ukri.json", "w") as file:
-    json.dump(feed, file, indent=4)
+print(config["rss_last_retrieved"])
 
-feed = feedparser.parse(r"http://www.govwire.co.uk/rss/innovate-uk")
+for rss in config["rss"]:
+    feed = feedparser.parse(rss)
+    for entry in feed["entries"]:
+        # checking when the rss was published, if it was before when we retrieved it
+        if datetime(*entry["published_parsed"][:5], tzinfo=timezone.utc) < config["rss_last_retrieved"]:
+            break
+        else:
+            # print(entry["title"])
+            # print(entry["summary"])
+            for topic in config["topics"]:
+                query = [
+                    SystemMessage(config["llm_system_message"]),
+                    HumanMessage(f"Is {entry["title"]} related to {topic}?")
+                ]
+                response = llm(query)
+                print(response.content)
 
-with open("innovate.json", "w") as file:
-    json.dump(feed, file, indent=4)
-
+config["rss_last_retrieved"] = datetime.now(tz=timezone.utc)
