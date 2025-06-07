@@ -34,6 +34,7 @@ for rss in config["rss"]:
                     HumanMessage(f"Is {entry["title"]} related to {topic}?")
                 ]
                 response = llm(query)
-                print(response.content)
+                if "yes" in response.content.lower():
+                    print(entry["title"])
 
 config["rss_last_retrieved"] = datetime.now(tz=timezone.utc)
