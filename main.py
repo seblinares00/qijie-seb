@@ -1,4 +1,5 @@
 import feedparser
+import json
 
 from langchain_ollama import ChatOllama
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -33,8 +34,6 @@ for rss in config["rss"]:
         if datetime(*entry["published_parsed"][:5], tzinfo=timezone.utc) < config["rss_last_retrieved"]:
             break
         else:
-            # print(entry["title"])
-            # print(entry["summary"])
             for topic in config["topics"]:
                 query = [
                     SystemMessage(llm_system_message),
@@ -42,6 +41,10 @@ for rss in config["rss"]:
                 ]
                 response = llm(query)
                 if "yes" in response.content.lower():
-                    print(entry["title"])
+                    topic_list[topic].append({"title": entry["title"],
+                                            "summary": entry["summary"],
+                                            "link": entry["link"]})
 
 config["rss_last_retrieved"] = datetime.now(tz=timezone.utc)
+with open("output.json", "w") as file:
+    json.dump(topic_list, file, indent=4)
