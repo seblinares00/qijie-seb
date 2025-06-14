@@ -22,6 +22,10 @@ llm_system_message = """You are a helpful classifer of topics.
             Only respond with Yes or No as classification. 
             Do not elborate. Do not respond with words other than yes or no."""
 
+topic_list = {}
+for topic in config["topics"]:
+    topic_list[topic] = []
+
 for rss in config["rss"]:
     feed = feedparser.parse(rss)
     for entry in feed["entries"]:
