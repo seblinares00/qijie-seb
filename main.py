@@ -31,7 +31,14 @@ for rss in config["rss"]:
     feed = feedparser.parse(rss)
     for entry in feed["entries"]:
         # checking when the rss was published, if it was before when we retrieved it
-        if datetime(*entry["published_parsed"][:5], tzinfo=timezone.utc) < config["rss_last_retrieved"]:
+        if "published_parsed" in entry.keys():
+            date = entry["published_parsed"]
+        elif "updated_parsed" in entry.keys():
+            date = entry["updated_parsed"]
+        else:
+            print("missing date")
+            break
+        if datetime(*date[:5], tzinfo=timezone.utc) < config["rss_last_retrieved"]:
             break
         else:
             for topic in config["topics"]:
