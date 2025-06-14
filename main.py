@@ -17,7 +17,10 @@ llm = ChatOllama(
 if config["rss_last_retrieved"] == "":
     config["rss_last_retrieved"] = datetime(1900,1,1,0,0, tzinfo=timezone.utc)
 
-print(config["rss_last_retrieved"])
+# setting the system message
+llm_system_message = """You are a helpful classifer of topics. 
+            Only respond with Yes or No as classification. 
+            Do not elborate. Do not respond with words other than yes or no."""
 
 for rss in config["rss"]:
     feed = feedparser.parse(rss)
@@ -30,8 +33,8 @@ for rss in config["rss"]:
             # print(entry["summary"])
             for topic in config["topics"]:
                 query = [
-                    SystemMessage(config["llm_system_message"]),
-                    HumanMessage(f"Is {entry["title"]} related to {topic}?")
+                    SystemMessage(llm_system_message),
+                    HumanMessage(f'Is "{entry["title"]}" related to {topic}?')
                 ]
                 response = llm(query)
                 if "yes" in response.content.lower():
