@@ -46,7 +46,7 @@ for rss in config["rss"]:
                     SystemMessage(llm_system_message),
                     HumanMessage(f'Is "{entry["title"]}" related to {topic}?')
                 ]
-                response = llm(query)
+                response = llm.invoke(query)
                 if "yes" in response.content.lower():
                     topic_list[topic].append({"title": entry["title"],
                                             "summary": entry["summary"],
